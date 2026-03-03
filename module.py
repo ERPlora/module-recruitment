@@ -33,3 +33,20 @@ PERMISSIONS = [
 'recruitment.change_candidate',
 'recruitment.manage_settings',
 ]
+
+ROLE_PERMISSIONS = {
+    "admin": ["*"],
+    "manager": [
+        "add_candidate",
+        "add_jobposition",
+        "change_candidate",
+        "change_jobposition",
+        "view_candidate",
+        "view_jobposition",
+    ],
+    "employee": [
+        "add_jobposition",
+        "view_candidate",
+        "view_jobposition",
+    ],
+}
