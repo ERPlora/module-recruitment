@@ -3,6 +3,8 @@ Recruitment Module Views
 """
 from django.core.paginator import Paginator
 from django.db.models import Q, Count
+from django.http import HttpResponse
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, render as django_render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -114,6 +116,7 @@ def job_positions_list(request):
     }
 
 @login_required
+@htmx_view('recruitment/pages/job_position_add.html', 'recruitment/partials/job_position_add_content.html')
 def job_position_add(request):
     hub_id = request.session.get('hub_id')
     if request.method == 'POST':
@@ -131,10 +134,13 @@ def job_position_add(request):
         obj.vacancies = vacancies
         obj.is_active = is_active
         obj.save()
-        return _render_job_positions_list(request, hub_id)
-    return django_render(request, 'recruitment/partials/panel_job_position_add.html', {})
+        response = HttpResponse(status=204)
+        response['HX-Redirect'] = reverse('recruitment:job_positions_list')
+        return response
+    return {}
 
 @login_required
+@htmx_view('recruitment/pages/job_position_edit.html', 'recruitment/partials/job_position_edit_content.html')
 def job_position_edit(request, pk):
     hub_id = request.session.get('hub_id')
     obj = get_object_or_404(JobPosition, pk=pk, hub_id=hub_id, is_deleted=False)
@@ -147,7 +153,7 @@ def job_position_edit(request, pk):
         obj.is_active = request.POST.get('is_active') == 'on'
         obj.save()
         return _render_job_positions_list(request, hub_id)
-    return django_render(request, 'recruitment/partials/panel_job_position_edit.html', {'obj': obj})
+    return {'obj': obj}
 
 @login_required
 @require_POST
@@ -265,6 +271,7 @@ def candidates_list(request):
     }
 
 @login_required
+@htmx_view('recruitment/pages/candidate_add.html', 'recruitment/partials/candidate_add_content.html')
 def candidate_add(request):
     hub_id = request.session.get('hub_id')
     if request.method == 'POST':
@@ -282,10 +289,13 @@ def candidate_add(request):
         obj.resume_notes = resume_notes
         obj.rating = rating
         obj.save()
-        return _render_candidates_list(request, hub_id)
-    return django_render(request, 'recruitment/partials/panel_candidate_add.html', {})
+        response = HttpResponse(status=204)
+        response['HX-Redirect'] = reverse('recruitment:candidates_list')
+        return response
+    return {}
 
 @login_required
+@htmx_view('recruitment/pages/candidate_edit.html', 'recruitment/partials/candidate_edit_content.html')
 def candidate_edit(request, pk):
     hub_id = request.session.get('hub_id')
     obj = get_object_or_404(Candidate, pk=pk, hub_id=hub_id, is_deleted=False)
@@ -298,7 +308,7 @@ def candidate_edit(request, pk):
         obj.rating = int(request.POST.get('rating', 0) or 0)
         obj.save()
         return _render_candidates_list(request, hub_id)
-    return django_render(request, 'recruitment/partials/panel_candidate_edit.html', {'obj': obj})
+    return {'obj': obj}
 
 @login_required
 @require_POST

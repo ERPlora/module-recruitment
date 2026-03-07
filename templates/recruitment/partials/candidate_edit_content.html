@@ -1,0 +1,67 @@
+{% load djicons i18n %}
+<div data-back-url="{% url 'recruitment:candidates_list' %}" hidden></div>
+
+<div class="p-4">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold">{% trans "Edit Candidate" %}</h1>
+        <div class="flex gap-2">
+            <a class="btn btn-ghost btn-sm"
+               hx-get="{% url 'recruitment:candidates_list' %}"
+               hx-target="#main-content-area"
+               hx-push-url="true">
+                {% trans "Cancel" %}
+            </a>
+            <button type="submit" form="edit-candidate-form" class="btn btn-sm color-primary">
+                {% icon "checkmark-outline" %}
+                {% trans "Save" %}
+            </button>
+        </div>
+    </div>
+
+        {% if error %}
+        <div class="callout callout-error">
+            <div class="callout-content"><span class="callout-text">{{ error }}</span></div>
+        </div>
+        {% endif %}
+    <!-- Form -->
+    <form id="edit-candidate-form"
+          hx-post="{% url 'recruitment:candidate_edit' obj.id %}" class="max-w-2xl">
+        {% csrf_token %}
+        <div class="card mb-4">
+            <div class="card-body flex flex-col gap-4">
+                <div>
+                <label class="text-sm font-medium mb-1 block">{% trans "Name" %}</label>
+                <input type="text" name="name" class="input input-sm w-full" value="{{ obj.name }}">
+                </div>
+
+                <div>
+                <label class="text-sm font-medium mb-1 block">{% trans "Email" %}</label>
+                <input type="email" name="email" class="input input-sm w-full" value="{{ obj.email }}">
+                </div>
+
+                <div>
+                <label class="text-sm font-medium mb-1 block">{% trans "Phone" %}</label>
+                <input type="text" name="phone" class="input input-sm w-full" value="{{ obj.phone }}">
+                </div>
+
+                <div>
+                <label class="text-sm font-medium mb-1 block">{% trans "Stage" %}</label>
+                <select name="stage" class="select select-sm w-full">
+                <option value="">---</option>
+                </select>
+                </div>
+
+                <div>
+                <label class="text-sm font-medium mb-1 block">{% trans "Resume Notes" %}</label>
+                <textarea name="resume_notes" class="textarea textarea-sm w-full" rows="3">{{ obj.resume_notes }}</textarea>
+                </div>
+
+                <div>
+                <label class="text-sm font-medium mb-1 block">{% trans "Rating" %}</label>
+                <input type="number" name="rating" class="input input-sm w-full" value="{{ obj.rating }}">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
