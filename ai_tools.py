@@ -94,3 +94,91 @@ class CreateCandidate(AssistantTool):
         from recruitment.models import Candidate
         c = Candidate.objects.create(position_id=args['position_id'], name=args['name'], email=args.get('email', ''), phone=args.get('phone', ''), resume_notes=args.get('resume_notes', ''))
         return {"id": str(c.id), "name": c.name, "created": True}
+
+
+@register_tool
+class UpdateJobPosting(AssistantTool):
+    name = "update_job_posting"
+    description = "Update a job position/posting's fields."
+    module_id = "recruitment"
+    required_permission = "recruitment.change_jobposition"
+    requires_confirmation = True
+    parameters = {
+        "type": "object",
+        "properties": {
+            "position_id": {"type": "string"},
+            "title": {"type": "string"},
+            "department": {"type": "string"},
+            "description": {"type": "string"},
+            "status": {"type": "string", "description": "draft, open, closed, on_hold"},
+            "vacancies": {"type": "integer"},
+            "is_active": {"type": "boolean"},
+        },
+        "required": ["position_id"],
+        "additionalProperties": False,
+    }
+
+    def execute(self, args, request):
+        from recruitment.models import JobPosition
+        try:
+            p = JobPosition.objects.get(id=args['position_id'])
+        except JobPosition.DoesNotExist:
+            return {"error": "Job position not found"}
+        fields = []
+        for field in ('title', 'department', 'description', 'status', 'vacancies', 'is_active'):
+            if field in args:
+                setattr(p, field, args[field])
+                fields.append(field)
+        if fields:
+            p.save(update_fields=fields + ['updated_at'])
+        return {"id": str(p.id), "title": p.title, "updated": True}
+
+
+@register_tool
+class DeleteJobPosting(AssistantTool):
+    name = "delete_job_posting"
+    description = "Delete a job position/posting."
+    module_id = "recruitment"
+    required_permission = "recruitment.delete_jobposition"
+    requires_confirmation = True
+    parameters = {
+        "type": "object",
+        "properties": {"position_id": {"type": "string"}},
+        "required": ["position_id"],
+        "additionalProperties": False,
+    }
+
+    def execute(self, args, request):
+        from recruitment.models import JobPosition
+        try:
+            p = JobPosition.objects.get(id=args['position_id'])
+            title = p.title
+            p.delete()
+            return {"deleted": True, "title": title}
+        except JobPosition.DoesNotExist:
+            return {"error": "Job position not found"}
+
+
+@register_tool
+class DeleteApplication(AssistantTool):
+    name = "delete_application"
+    description = "Delete a candidate application."
+    module_id = "recruitment"
+    required_permission = "recruitment.delete_candidate"
+    requires_confirmation = True
+    parameters = {
+        "type": "object",
+        "properties": {"candidate_id": {"type": "string"}},
+        "required": ["candidate_id"],
+        "additionalProperties": False,
+    }
+
+    def execute(self, args, request):
+        from recruitment.models import Candidate
+        try:
+            c = Candidate.objects.get(id=args['candidate_id'])
+            name = c.name
+            c.delete()
+            return {"deleted": True, "name": name}
+        except Candidate.DoesNotExist:
+            return {"error": "Candidate not found"}
