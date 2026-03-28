@@ -7,6 +7,7 @@ MODULE_ICON = 'material:person_search'
 MODULE_DESCRIPTION = _('Job postings, candidates and hiring pipeline')
 MODULE_AUTHOR = 'ERPlora'
 MODULE_CATEGORY = 'hr'
+HAS_MODELS = True
 
 MENU = {
     'label': _('Recruitment'),
